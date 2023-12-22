@@ -1,2 +1,2 @@
 # SkyIsYours
-A Scanner + Bruter + Loader armed with arts of work distribution
+A Scanner and Bruter armed with arts of work distribution
