@@ -17,7 +17,7 @@ func bruter(target string, rate int, pull *zmq.Socket) {
 	sem := make(chan struct{}, 5)
 	file, err := os.Open(target)
 	if err != nil {
-		log.Fatalln("Error opening file:", err)
+		log.Fatalln("\033[31mError opening file:", err, "\033[31m")
 		return
 	}
 	defer file.Close()
@@ -67,6 +67,10 @@ func main() {
 		rateInt = 100
 	}
 
+	if host == "0.0.0.0" {
+		host = "*"
+	}
+
 	if host == "" {
 		log.Fatalln("Specify scanner host (--shost)")
 	}
@@ -76,7 +80,7 @@ func main() {
 	}
 
 	if file == "" {
-		log.Fatalln("No password file specified (--passwd <path>)")
+		log.Fatalln("\033[31mNo password file specified (--passwd <path>)\033[0m")
 	}
 	if _, err := os.Stat(file); err != nil {
 		if os.IsNotExist(err) {

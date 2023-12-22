@@ -59,7 +59,7 @@ term:
 
 	wg2.Wait()
 
-	log.Printf("\033[1;36mrapid finished\033[0m\n")
+	log.Printf("\033[1;36mrapidwave finished\033[0m\n")
 
 	<-sem
 
@@ -75,12 +75,10 @@ term:
 					break
 				}
 			case <-time.After(5 * time.Second):
-				ifslow = true
 				break
 			}
 			close(cancel)
 		} else {
-			log.Println("cancel is closed")
 			select {
 			case x, ok := <-cracked:
 				if ok {
@@ -90,7 +88,6 @@ term:
 					break
 				}
 			case <-time.After(5 * time.Second):
-				ifslow = true
 				break
 			}
 		}

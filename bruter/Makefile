@@ -1,2 +1,2 @@
-run:
-	go run bruter.go --passwd pass.txt
+build:
+	go build bruter.go

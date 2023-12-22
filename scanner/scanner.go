@@ -33,8 +33,14 @@ func scanner(target string, rate int, push *zmq.Socket) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		sem <- struct{}{}
+
+		if line == "" {
+			<-sem
+			continue
+		}
+
 		if !isPublicIPv4(line) {
-			log.Printf("%s is not a public ip", line)
+			log.Printf("\033[31m%s is not a public ip\033[0m", line)
 			<-sem
 			continue
 		}
@@ -50,6 +56,13 @@ func scanner(target string, rate int, push *zmq.Socket) {
 	for result := range clist {
 		list = append(list, result)
 	}
+
+	if len(list) == 0 {
+		log.Println("\033[31mno target to push to bruter\033[0m")
+		return
+	}
+
+	log.Printf("pushing %d target/s to bruter\n", len(list))
 
 	time.Sleep(time.Millisecond * 100)
 	for _, value := range list {
@@ -112,8 +125,8 @@ func main() {
 	rateStr := *ratePtr
 
 	rateInt, err := strconv.Atoi(rateStr)
-	if err != nil || rateStr == "" {
-		rateInt = 50
+	if err != nil || rateStr == "" || rateInt < 0 {
+		rateInt = 100
 	}
 
 	if file == "" {
