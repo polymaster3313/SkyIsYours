@@ -1,16 +1,26 @@
 package main
 
 import (
+	"SkyIsYours/scanner/portdetect"
 	"bufio"
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
+	"strconv"
+	"sync"
+	"time"
 
 	zmq "github.com/pebbe/zmq4"
 )
 
-func scanner(target string, push *zmq.Socket) {
+func scanner(target string, rate int, push *zmq.Socket) {
+	var wg sync.WaitGroup
+	var list []string
+	clist := make(chan string)
+	sem := make(chan struct{}, rate)
+
 	file, err := os.Open(target)
 	if err != nil {
 		log.Fatalln("Error opening file:", err)
@@ -22,39 +32,88 @@ func scanner(target string, push *zmq.Socket) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
-
+		sem <- struct{}{}
+		if !isPublicIPv4(line) {
+			log.Printf("%s is not a public ip", line)
+			<-sem
+			continue
+		}
+		wg.Add(1)
+		go checker(line, clist, &wg, sem)
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Error reading file:", err)
+	go func() {
+		wg.Wait()
+		close(clist)
+	}()
+
+	for result := range clist {
+		list = append(list, result)
+	}
+
+	time.Sleep(time.Millisecond * 100)
+	for _, value := range list {
+
+		log.Printf("sending %s to bruter", value)
+		push.Send(value, 0)
+	}
+
+	time.Sleep(time.Millisecond * 100)
+}
+
+func isPublicIPv4(address string) bool {
+	ip := net.ParseIP(address)
+	if ip == nil || ip.To4() == nil {
+		return false
+	}
+
+	return !ip.IsLoopback() && !ip.IsLinkLocalMulticast() && !ip.IsLinkLocalUnicast() && !ip.IsMulticast() && !ip.IsUnspecified() && !ip.IsPrivate()
+}
+
+func checker(ip string, clist chan<- string, wg *sync.WaitGroup, sem <-chan struct{}) {
+	defer func() {
+		<-sem
+		wg.Done()
+	}()
+
+	result := portdetect.PortDetect(ip)
+	if result == "ssh" {
+		clist <- ip
 	}
 }
 
-func checker(ip string) {
-
+func getDefaultValue(value, defaultValue string) string {
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
+
+func getConnection(ipc bool, host, port string) string {
+	if !ipc {
+		return fmt.Sprintf("tcp://%s:%s", host, port)
+	}
+	return "ipc:///tmp/Sky"
+}
+
 func main() {
-	fmt.Println("Scanner started")
+	ipcPtr := flag.Bool("ipc", false, "use interprocess communication")
+	filePtr := flag.String("target", "", "path to the target file")
+	hostPtr := flag.String("host", "", "host IP")
+	portPtr := flag.String("port", "", "port number")
+	ratePtr := flag.String("rate", "", "rate of IP scanning")
 
-	ipcPtr := flag.Bool("ipc", false, "interprocess communication")
-	filePtr := flag.String("target", "", "Path to the target")
-	hostPtr := flag.String("host", "", "Host ip")
-	portPtr := flag.String("port", "", "Port number")
+	flag.Parse()
 
 	file := *filePtr
-	port := *portPtr
-	host := *hostPtr
+	port := getDefaultValue(*portPtr, "5544")
+	host := getDefaultValue(*hostPtr, "127.0.0.1")
 	ipc := *ipcPtr
+	rateStr := *ratePtr
 
-	if !ipc {
-		if port == "" {
-			port = "1000"
-		}
-
-		if host == "" {
-			host = "*"
-		}
+	rateInt, err := strconv.Atoi(rateStr)
+	if err != nil || rateStr == "" {
+		rateInt = 50
 	}
 
 	if file == "" {
@@ -67,8 +126,8 @@ func main() {
 			log.Fatalf("Error checking the file: %v\n", err)
 		}
 	}
-	context, err := zmq.NewContext()
 
+	context, err := zmq.NewContext()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -79,24 +138,16 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if !ipc {
-		err = push.Bind(fmt.Sprintf("tcp://%s:%s", host, port))
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		log.Printf("Binded on tcp://%s:%s\n", host, port)
-		scanner(file, push)
-	}
-
-	err = push.Bind("ipc:///tmp/Sky")
-
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Printf("Binded on ipc:///tmp/Sky")
-	scanner(file, push)
+	connection := getConnection(ipc, host, port)
+	err = push.Bind(connection)
+	if err != nil {
+		log.Fatalf("Error binding to %s: %v\n", connection, err)
+	}
 
+	log.Printf("Binded on %s\n", connection)
+	scanner(file, rateInt, push)
 }
