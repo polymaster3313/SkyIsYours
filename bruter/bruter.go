@@ -13,6 +13,7 @@ import (
 )
 
 func bruter(target string, rate int, pull *zmq.Socket) {
+	log.Printf("bruter started on %s with rate %d\n", target, rate)
 	var passwords []string
 	sem := make(chan struct{}, 5)
 	file, err := os.Open(target)
@@ -56,15 +57,15 @@ func main() {
 
 	port := getDefaultValue(*portPtr, "5544")
 	host := getDefaultValue(*hostPtr, "127.0.0.1")
-	rateStr := getDefaultValue(*ratePtr, "100")
+	rateStr := getDefaultValue(*ratePtr, "200")
 	ipc := *ipcPtr
 	file := *passPtr
 
 	rateInt, err := strconv.Atoi(rateStr)
 
 	if err != nil {
-		log.Println("Using default rate (100) due to an invalid rate value")
-		rateInt = 100
+		log.Println("Using default rate (200) due to an invalid rate value")
+		rateInt = 200
 	}
 
 	if host == "0.0.0.0" {
