@@ -20,18 +20,16 @@ bandwidth: 500mbps
 55s (rapid wave) + 0s (slow wave)
 ```
 
-## SkyBruter 10000 passswords wordlist (200 rate)
-
-```
-8m 24s (rapid wave) + : 35s (slow wave) 
-```
 
 ## Hydra 1000 passwords wordlist
 ```
 time: 5m 10s
+
 ```
 
 ## Medusa benchmark 1000 passwords wordlist
 ```
 time: 10m+
 ```
+
+![Chart (1)](https://github.com/polymaster3313/SkyIsYours/assets/93959737/9091ed91-da20-4c66-85ab-1777bcbfc607)
