@@ -12,6 +12,7 @@ interprocess mode
 ```
 
 ## The Sky architecture
+### Load balancing
 ```mermaid
 graph TD;
     SkyScanner-->Skybruter1;
@@ -21,16 +22,50 @@ graph TD;
 ```
 
 ## SkyBruter
+### rapid wave
 
-```mermard
+Skybruter initiates a rapidwave by spawning a limited pool of up to 200 goroutines, each attempting to connect to the server with distinct passwords. In case of ratelimiting, the goroutine joins a slowwave queue. If the result indicates an invalid password or ratelimiting, the goroutine relinquishes its position, allowing other goroutines with different passwords to join. Upon discovering the correct password, no new goroutines are allowed, and slowwave is canceled. If unsuccessful, slowwave validates ratelimited passwords.
+
+```mermaid
+graph TD
+    subgraph Skybruter
+        A[rapidwave] -->|Spawns Pool| B[goroutine pool 200 rate]
+        B -->|1| C[password123]
+        B -->|2| D[weakpassword]
+        B -->|3| E[Emily]
+        B -->|4| I[123456]
+        B -->|...| F[...]
+        B -->|200| G[balls]
+        C -->|rate limited| I1[slowwave queue]
+        I -->|rate limited| I1[slowwave queue]
+
+    end
+
+    subgraph Server
+        H[Target]
+        C -->|Connects to| H
+        D -->|Connects to| H
+        E -->|Connects to| H
+        F -->|Connects to| H
+        G -->|Connects to| H
+        I -->|Connects to| H
+
+    end
+```
+
+### slowwave
+Slowwave is designed to validate passwords obtained from a ratelimited source by employing a traditional SSH brute-force approach. It systematically attempts each password one by one, determining their correctness and confirming their validity. The process involves accessing the slowqueue, where potential passwords are stored. Upon retrieving a password, Slowwave establishes a connection to the target. If the password is correct, it proceeds to process the result . In the event of an incorrect password, the cycle continues by reattempting passwords through the slowqueue, Until no password is left.
+
+```mermaid
 graph TD
     subgraph Golang Program
-        A[Main Routine] -->|Spawns Pool| B[Worker Pool]
-        B -->|1| C[Goroutine 1]
-        B -->|2| D[Goroutine 2]
-        B -->|3| E[Goroutine 3]
-        B -->|...| F[Goroutine ...]
-        B -->|100| G[Goroutine 100]
+        A[Slowwave] -->|access| B[slowqueue]
+        B -->|If empty| O[No password found]
+        B -->|receive password| C[password]
+        C -->|connects target| D[target]
+        D -->|Correct| E[Password found]
+        E --> O
+        D -->|Wrong| B
     end
 ```
 ## BENCHMARK
