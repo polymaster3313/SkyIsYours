@@ -59,7 +59,7 @@ Slowwave is designed to validate passwords obtained from a ratelimited source by
 
 ```mermaid
 graph TD
-    subgraph Golang Program
+    subgraph Slowwave
         A[Slowwave] -->|access| B[slowqueue]
         B -->|If empty| O[No password found]
         B -->|receive password| C[password]
