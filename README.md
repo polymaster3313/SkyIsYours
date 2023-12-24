@@ -61,7 +61,7 @@ Slowwave is designed to validate passwords obtained from a ratelimited source by
 graph TD
     subgraph SkyBruter
         A[Slowwave] -->|access| B[slowqueue]
-        B -->|If empty| O[No password found]
+        B -->|If empty| O[Terminates]
         B -->|receive password| C[password]
         C -->|connects target| D[target]
         D -->|Correct| E[Password found]
