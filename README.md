@@ -29,7 +29,7 @@ Skybruter initiates a rapidwave by spawning a limited pool of up to 200 goroutin
 
 ```mermaid
 graph TD
-    subgraph Skybruter
+    subgraph SkyBruter
         A[rapidwave] -->|Spawns Pool| B[goroutine pool 200 rate]
         B -->|1| C[password123]
         B -->|2| D[weakpassword]
@@ -59,7 +59,7 @@ Slowwave is designed to validate passwords obtained from a ratelimited source by
 
 ```mermaid
 graph TD
-    subgraph Slowwave
+    subgraph SkyBruter
         A[Slowwave] -->|access| B[slowqueue]
         B -->|If empty| O[No password found]
         B -->|receive password| C[password]
