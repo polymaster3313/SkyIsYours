@@ -4,7 +4,7 @@ A Scanner and Bruter armed with arts of work distribution
 ## Features
 ```
 smart scanning
-fast brute force speed (17 ssh brute per second)
+fast brute force speed (17-21 ssh brute per second)
 fast scanning speed
 load distribution
 fault tolerant sockets
