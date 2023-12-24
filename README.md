@@ -19,6 +19,29 @@ graph TD;
     SkyScanner-->Skybruter3;
     SkyScanner-->Skybruter4;
 ```
+
+## SkyBruter
+
+```mermard
+graph TD
+    subgraph Golang Program
+        A[Main Routine] -->|Spawns Pool| B[Worker Pool]
+        B -->|1| C[Goroutine 1]
+        B -->|2| D[Goroutine 2]
+        B -->|3| E[Goroutine 3]
+        B -->|...| F[Goroutine ...]
+        B -->|100| G[Goroutine 100]
+    end
+
+    subgraph Server
+        H[Server]
+        C -->|Connects to| H
+        D -->|Connects to| H
+        E -->|Connects to| H
+        F -->|Connects to| H
+        G -->|Connects to| H
+    end
+```
 ## BENCHMARK
 
 system information
