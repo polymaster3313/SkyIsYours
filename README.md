@@ -9,6 +9,7 @@ fast scanning speed
 load distribution
 fault tolerant sockets
 interprocess mode
+SSH
 ```
 
 ## The Sky architecture
