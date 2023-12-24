@@ -15,10 +15,10 @@ interprocess mode
 ### Load balancing
 ```mermaid
 graph TD;
-    SkyScanner-->Skybruter1;
-    SkyScanner-->Skybruter2;
-    SkyScanner-->Skybruter3;
-    SkyScanner-->Skybruter4;
+    SkyScanner --> |126.207.193.116| Skybruter1;
+    SkyScanner --> |159.27.168.28| Skybruter2;
+    SkyScanner --> |156.213.208.17| Skybruter3;
+    SkyScanner --> |11.77.180.157| Skybruter4;
 ```
 
 ## SkyBruter
@@ -54,7 +54,7 @@ graph TD
 ```
 
 ### slowwave
-Slowwave is designed to validate passwords obtained from a ratelimited source by employing a traditional SSH brute-force approach. It systematically attempts each password one by one, determining their correctness and confirming their validity. The process involves accessing the slowqueue, where potential passwords are stored. Upon retrieving a password, Slowwave establishes a connection to the target. If the password is correct, it proceeds to process the result . In the event of an incorrect password, the cycle continues by reattempting passwords through the slowqueue, Until no password is left.
+Slowwave is designed to validate passwords obtained from a ratelimited source by employing a traditional SSH brute-force approach. It systematically attempts each password one by one, determining their correctness and confirming their validity. The process involves accessing the slowqueue, where potential passwords are stored. Upon retrieving a password, Slowwave establishes a connection to the target. If the password is correct, it proceeds to process the result . In the event of an incorrect password, the cycle continues by reattempting passwords through the slowqueue, Until no password is found.
 
 ```mermaid
 graph TD
