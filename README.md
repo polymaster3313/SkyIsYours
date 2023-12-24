@@ -25,7 +25,7 @@ graph TD;
 ## SkyBruter
 ### rapid wave
 
-Skybruter initiates a rapidwave by spawning a limited pool of up to 200 goroutines, each attempting to connect to the server with distinct passwords. In case of ratelimiting, the goroutine joins a slowwave queue. If the result indicates an invalid password or ratelimiting, the goroutine relinquishes its position, allowing other goroutines with different passwords to join. Upon discovering the correct password, no new goroutines are allowed, and slowwave is canceled. If unsuccessful, slowwave validates ratelimited passwords.
+Skybruter initiates a rapidwave by spawning a limited pool of up to 200 goroutines, each attempting to connect to the server with distinct passwords. In case of ratelimiting, the goroutine joins a slowwave queue. If the result indicates an invalid password or ratelimiting, the goroutine relinquishes its position, allowing other goroutines with different passwords to join. Upon discovering the correct password, no new goroutines are allowed, and slowwave is canceled. If rapidwave finished with no correct password and passwords in slowqueue, slowwave initiates
 
 ```mermaid
 graph TD
