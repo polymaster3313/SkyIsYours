@@ -32,15 +32,6 @@ graph TD
         B -->|...| F[Goroutine ...]
         B -->|100| G[Goroutine 100]
     end
-
-    subgraph Server
-        H[Server]
-        C -->|Connects to| H
-        D -->|Connects to| H
-        E -->|Connects to| H
-        F -->|Connects to| H
-        G -->|Connects to| H
-    end
 ```
 ## BENCHMARK
 
