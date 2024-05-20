@@ -84,4 +84,7 @@ bandwidth: 100mbps
 
 ### Benchmark 1000 pass dictionary attack
 
-![Chart (1)](https://github.com/polymaster3313/SkyIsYours/assets/93959737/9091ed91-da20-4c66-85ab-1777bcbfc607)
+![image](https://github.com/polymaster3313/SkyIsYours/assets/93959737/6fc77c9f-9f15-441f-bc95-aaa262985e4d)
+
+### Benchmark 10000 pass dictionary attack
+![image](https://github.com/polymaster3313/SkyIsYours/assets/93959737/11d7a186-490a-4e1c-9047-d8a754a2208d)
